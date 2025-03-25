@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Il Gusto Italiano - Blog di Cucina{% endblock %}
+
+{% block content %}
+<div class="jumbotron p-5 mb-4 bg-light rounded-3">
+    <div class="container py-5">
+        <h1 class="display-4 fw-bold">Benvenuto nel Gusto Italiano</h1>
+        <p class="col-md-8 fs-4">Scopri le migliori ricette della tradizione italiana, consigli e segreti culinari.</p>
+        <a class="btn btn-primary btn-lg" href="#articoli">Esplora le Ricette</a>
+    </div>
+</div>
+
+<section id="articoli" class="py-5">
+    <h2 class="text-center mb-4">Le Nostre Ultime Ricette</h2>
+    <div class="row">
+        {% for articolo in articoli %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if articolo.immagine %}
+                <img src="{{ articolo.immagine.url }}" class="card-img-top" alt="{{ articolo.titolo }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <img src="{% static 'img/default-recipe.jpg' %}" class="card-img-top" alt="Immagine predefinita" style="height: 200px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ articolo.titolo }}</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="badge bg-primary">{{ articolo.categoria.nome }}</span>
+                        <span class="badge bg-secondary">{{ articolo.difficolta|title }}</span>
+                    </div>
+                    <p class="card-text">{{ articolo.contenuto|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="far fa-clock"></i> {{ articolo.tempo_preparazione }} min
+                        </small>
+                        <a href="{% url 'articolo_detail' articolo.slug %}" class="btn btn-sm btn-outline-primary">Leggi di più</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <p>Nessun articolo disponibile al momento.</p>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if is_paginated %}
+    <nav aria-label="Paginazione" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; Prima</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Precedente</a>
+            </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Successiva</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Ultima &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</section>
+{% endblock %}

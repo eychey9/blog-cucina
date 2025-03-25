@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ articolo.titolo }} - Il Gusto Italiano{% endblock %}
+
+{% block content %}
+<article class="mb-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-3">{{ articolo.titolo }}</h1>
+            <div class="d-flex justify-content-between mb-4">
+                <div>
+                    <span class="badge bg-primary">{{ articolo.categoria.nome }}</span>
+                    <span class="badge bg-secondary">{{ articolo.difficolta|title }}</span>
+                    <span class="badge bg-info text-dark">
+                        <i class="far fa-clock"></i> {{ articolo.tempo_preparazione }} min
+                    </span>
+                </div>
+                <div class="text-muted">
+                    <small>
+                        <i class="far fa-calendar-alt"></i> {{ articolo.data_pubblicazione|date:"d F Y" }}
+                        <i class="far fa-user ms-2"></i> {{ articolo.autore.username }}
+                    </small>
+                </div>
+            </div>
+            
+            {% if articolo.immagine %}
+            <img src="{{ articolo.immagine.url }}" class="img-fluid rounded mb-4" alt="{{ articolo.titolo }}">
+            {% endif %}
+            
+            <div class="article-content">
+                {{ articolo.contenuto|linebreaks }}
+            </div>
+            
+            {% if user.is_authenticated and user == articolo.autore %}
+            <div class="mt-4">
+                <a href="{% url 'articolo_update' articolo.slug %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> Modifica
+                </a>
+                <a href="{% url 'articolo_delete' articolo.slug %}" class="btn btn-outline-danger ms-2">
+                    <i class="fas fa-trash"></i> Elimina
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informazioni Ricetta</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Difficoltà
+                            <span>{{ articolo.difficolta|title }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Tempo di preparazione
+                            <span>{{ articolo.tempo_preparazione }} minuti</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Categoria
+                            <a href="{% url 'categoria_detail' articolo.categoria.slug %}">{{ articolo.categoria.nome }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Condividi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-around">
+                        <a href="#" class="text-primary fs-4"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-info fs-4"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-danger fs-4"><i class="fab fa-pinterest"></i></a>
+                        <a href="#" class="text-success fs-4"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+
+<section class="mt-5">
+    <h3 class="mb-4">Commenti ({{ commenti.count }})</h3>
+    
+    {% for commento in commenti %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h5 class="card-title">{{ commento.nome }}</h5>
+                <small class="text-muted">{{ commento.data_creazione|date:"d F Y, H:i" }}</small>
+            </div>
+            <p class="card-text">{{ commento.testo|linebreaks }}</p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">
+        Non ci sono ancora commenti. Sii il primo a commentare!
+    </div>
+    {% endfor %}
+    
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h4 class="mb-0">Lascia un commento</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="{{ commento_form.nome.id_for_label }}" class="form-label">Nome</label>
+                    {{ commento_form.nome }}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ commento_form.email.id_for_label }}" class="form-label">Email</label>
+                    {{ commento_form.email }}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ commento_form.testo.id_for_label }}" class="form-label">Commento</label>
+                    {{ commento_form.testo }}
+                </div>
+                <button type="submit" class="btn btn-primary">Invia commento</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
